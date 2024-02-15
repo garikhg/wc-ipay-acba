@@ -68,7 +68,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 			$this->id                 = 'woopay_acba';
 			$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 			$this->has_fields         = true;
-			$this->method_title       = __( 'WooPayment ACBA Payment Gateway', 'woopay-acba' );
+			$this->method_title       = __( 'ACBA Bank Payment Gateway', 'woopay-acba' );
 			$this->method_description = __( 'Pay with ACBA Bank is a seamless payment system tailored for transactions in Armenian Dram.', 'woopay-acba' );
 
 			$this->title       = $this->get_option( 'title' );
