@@ -1,4 +1,4 @@
-=== iPay ACBA Bank Payment Gateway — for WooCommerce ===
+=== WooPayment ACBA Bank Payment Gateway — for WooCommerce ===
 Contributors: garegin hakobyan
 Tags: woocommerce payments, credit card, payment, payment gateway, acba payment gateway
 Requires at least: 6.0
@@ -13,7 +13,7 @@ Pay with ACBA Bank is a seamless payment system tailored for transactions in Arm
 Pay with ACBA Bank ensures swift and secure payments for various goods and services.
 
 **Pay as you go**
-iPay ACBA Payment Gateway plugin is **free to install**, with **no setup fees or monthly fees**.
+WooPayment ACBA Payment Gateway plugin is **free to install**, with **no setup fees or monthly fees**.
 
 == Getting Started ==
 
@@ -23,10 +23,13 @@ iPay ACBA Payment Gateway plugin is **free to install**, with **no setup fees or
 * PHP 7.3 or newer is recommended.
 
 == Installation ==
-Install and activate the WooCommerce and iPay ACBA Payment Gateway plugins, if you haven't already done so, then
+Install and activate the WooCommerce and WooPayment ACBA Payment Gateway plugins, if you haven't already done so, then
 go to "Payments" in the WordPress admin menu and follow the instructions there.
 
 == Changelog ==
+
+= 0.0.2 - 2024-02-15 =
+* Fixed: Rename plugin iPay ACBA payment gateway to WooPayment ACBA
 
 = 0.0.1 - 2024-02-14 =
 * Add Alpha Release
