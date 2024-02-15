@@ -3,13 +3,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
+if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 	/**
-	 * Class iPay_Acba_Payment_Gateway
+	 * WooPayACBA Main Class.
 	 *
-	 * Represents the iPay ACBA Payment Gateway.
+	 * @param int $order_id The ID of the order to change the status.
+	 * @param string $new_status The new status to set for the order.
+	 * @param string $old_status The old status of the order.
+	 *
+	 * @return void
+	 * @since 1.0.0
 	 */
-	class iPay_Acba_Payment_Gateway extends WC_Payment_Gateway {
+	class WooPay_Acba_Payment_Gateway extends WC_Payment_Gateway {
 		/**
 		 * Variable to store the currency code.
 		 *
@@ -63,8 +68,8 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 			$this->id                 = 'ipay_acba';
 			$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 			$this->has_fields         = true;
-			$this->method_title       = __( 'iPay ACBA Payment Gateway', 'wc-ipay-acba' );
-			$this->method_description = __( 'Pay with ACBA Bank is a seamless payment system tailored for transactions in Armenian Dram.', 'wc-ipay-acba' );
+			$this->method_title       = __( 'iPay ACBA Payment Gateway', 'woopay-acba' );
+			$this->method_description = __( 'Pay with ACBA Bank is a seamless payment system tailored for transactions in Armenian Dram.', 'woopay-acba' );
 
 			$this->title       = $this->get_option( 'title' );
 			$this->description = $this->get_option( 'description' );
@@ -112,58 +117,58 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 		public function init_form_fields() {
 			$this->form_fields = array(
 				'enabled'            => [
-					'title'       => __( 'Enable/Disable', 'wc-ipay-acba' ),
-					'label'       => __( 'Enable Payment Gateway', 'wc-ipay-acba' ),
+					'title'       => __( 'Enable/Disable', 'woopay-acba' ),
+					'label'       => __( 'Enable Payment Gateway', 'woopay-acba' ),
 					'type'        => 'checkbox',
 					'description' => '',
 					'default'     => 'no'
 				],
 				'title'              => [
-					'title'       => __( 'Title', 'wc-ipay-acba' ),
+					'title'       => __( 'Title', 'woopay-acba' ),
 					'type'        => 'text',
-					'description' => __( 'This controls the title which the user sees during checkout.', 'wc-ipay-acba' ),
-					'default'     => __( 'Pay via Credit card / debit card', 'wc-ipay-acba' )
+					'description' => __( 'This controls the title which the user sees during checkout.', 'woopay-acba' ),
+					'default'     => __( 'Pay via Credit card / debit card', 'woopay-acba' )
 				],
 				'description'        => [
-					'title'       => __( 'Description', 'wc-ipay-acba' ),
+					'title'       => __( 'Description', 'woopay-acba' ),
 					'type'        => 'textarea',
-					'description' => __( 'This controls the description which the user sees during checkout.', 'wc-ipay-acba' ),
+					'description' => __( 'This controls the description which the user sees during checkout.', 'woopay-acba' ),
 					'default'     => '',
 				],
 				'language'           => [
-					'title'       => __( 'Interface Language', 'wc-ipay-acba' ),
+					'title'       => __( 'Interface Language', 'woopay-acba' ),
 					'type'        => 'select',
 					'options'     => [
-						'hy' => __( 'Armenian', 'wc-ipay-acba' ),
-						'ru' => __( 'Russian', 'wc-ipay-acba' ),
-						'en' => __( 'English', 'wc-ipay-acba' ),
+						'hy' => __( 'Armenian', 'woopay-acba' ),
+						'ru' => __( 'Russian', 'woopay-acba' ),
+						'en' => __( 'English', 'woopay-acba' ),
 					],
-					'description' => __( 'The language of the bank purchase interface.', 'wc-ipay-acba' ),
+					'description' => __( 'The language of the bank purchase interface.', 'woopay-acba' ),
 					'default'     => 'hy',
 					'desc_tip'    => true,
 				],
 				'testmode'           => [
-					'title'       => __( 'Test mode', 'wc-ipay-acba' ),
-					'label'       => __( 'Enable Test Mode', 'wc-ipay-acba' ),
+					'title'       => __( 'Test mode', 'woopay-acba' ),
+					'label'       => __( 'Enable Test Mode', 'woopay-acba' ),
 					'type'        => 'checkbox',
-					'description' => __( 'Place the payment gateway in test mode using test API keys.', 'wc-ipay-acba' ),
+					'description' => __( 'Place the payment gateway in test mode using test API keys.', 'woopay-acba' ),
 					'default'     => 'yes',
 					'desc_tip'    => true,
 				],
 				'test_shop_id'       => [
-					'title' => __( 'Test Shop ID', 'wc-ipay-acba' ),
+					'title' => __( 'Test Shop ID', 'woopay-acba' ),
 					'type'  => 'text',
 				],
 				'test_shop_password' => [
-					'title' => __( 'Test Shop Password', 'wc-ipay-acba' ),
+					'title' => __( 'Test Shop Password', 'woopay-acba' ),
 					'type'  => 'password',
 				],
 				'live_shop_id'       => [
-					'title' => __( 'Shop ID', 'wc-ipay-acba' ),
+					'title' => __( 'Shop ID', 'woopay-acba' ),
 					'type'  => 'text',
 				],
 				'live_shop_password' => [
-					'title' => __( 'Shop Password', 'wc-ipay-acba' ),
+					'title' => __( 'Shop Password', 'woopay-acba' ),
 					'type'  => 'password',
 				]
 			);
@@ -280,7 +285,7 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 					} else {
 						$order->update_status( 'on-hold' );
 					}
-					wp_die( sprintf( __( 'Connection error. Order confirm #%s is failed. Please try again.', 'wc-ipay-acba' ), $order_id ) );
+					wp_die( sprintf( __( 'Connection error. Order confirm #%s is failed. Please try again.', 'woopay-acba' ), $order_id ) );
 				}
 			}
 		}
@@ -328,11 +333,11 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 						}
 					} else {
 						$order->update_status( 'processing' );
-						wp_die( sprintf( __( 'Order Cancel paymend #%s failed.', 'wc-ipay-acba' ), $order_id ) );
+						wp_die( sprintf( __( 'Order Cancel paymend #%s failed.', 'woopay-acba' ), $order_id ) );
 					}
 				} else {
 					$order->update_status( 'processing' );
-					wp_die( __( 'Connection error. Please try again', 'wc-ipay-acba' ) );
+					wp_die( __( 'Connection error. Please try again', 'woopay-acba' ) );
 				}
 			}
 		}
@@ -369,7 +374,7 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 							if ( isset( $body->orderStatus ) && $body->orderStatus == '2' ) {
 								$order = wc_get_order( $body->orderNumber );
 								if ( $order->has_status( 'processing' ) ) {
-									wc_add_notice( sprintf( __( 'Your order #%s is in processing.', 'wc-ipay-acba' ), $body->orderNumber ) );
+									wc_add_notice( sprintf( __( 'Your order #%s is in processing.', 'woopay-acba' ), $body->orderNumber ) );
 									wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
 								} else {
 									$order->update_status( 'processing' );
@@ -383,15 +388,15 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 							wc_add_notice( $body->errorMessage, 'error' );
 						}
 					} else {
-						wc_add_notice( __( 'An error has occurred, please contact the site administrator', 'wc-ipay-acba' ), 'error' );
+						wc_add_notice( __( 'An error has occurred, please contact the site administrator', 'woopay-acba' ), 'error' );
 					}
 				} else {
-					wc_add_notice( __( 'Connection error. Please contact with site administrator.', 'wc-ipay-acba' ), 'error' );
+					wc_add_notice( __( 'Connection error. Please contact with site administrator.', 'woopay-acba' ), 'error' );
 					wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
 				}
 			}
 
-			wc_add_notice( __( 'Please try again', 'wc-ipay-acba' ), 'error' );
+			wc_add_notice( __( 'Please try again', 'woopay-acba' ), 'error' );
 			wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
 			exit();
 		}
@@ -434,11 +439,11 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 						exit();
 					} else {
 						$order->update_status( 'failed' );
-						wc_add_notice( __( 'We regret to inform you that an issue has occurred. Kindly attempt the process again.', 'wc-ipay-acba' ), 'error' );
+						wc_add_notice( __( 'We regret to inform you that an issue has occurred. Kindly attempt the process again.', 'woopay-acba' ), 'error' );
 					}
 				} else {
 					$order->update_status( 'failed' );
-					wc_add_notice( __( 'Connection error. Please contact with site administrator.', 'wc-ipay-acba' ), 'error' );
+					wc_add_notice( __( 'Connection error. Please contact with site administrator.', 'woopay-acba' ), 'error' );
 				}
 			}
 
@@ -504,7 +509,7 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 
 				} else {
 					$order->update_status( 'failed' );
-					wc_add_notice( __( 'Connection error. Please try again', 'wc-ipay-acba' ), 'error' );
+					wc_add_notice( __( 'Connection error. Please try again', 'woopay-acba' ), 'error' );
 
 					return [
 						'result'   => 'success',
@@ -513,7 +518,7 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 				}
 			} else {
 				$order->update_status( 'failed' );
-				wc_add_notice( __( 'Connection error. Please try again later.', 'wc-ipay-acba' ), 'error' );
+				wc_add_notice( __( 'Connection error. Please try again later.', 'woopay-acba' ), 'error' );
 				wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
 
 				return [
