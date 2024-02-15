@@ -481,7 +481,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			$gateway_params[] = 'description=order number ' . $order_id;
 			$gateway_params[] = 'returnUrl=' . get_site_url() . '/wc-api/ipay_acba_successful?order=' . $order_id;
 			$gateway_params[] = 'failUrl=' . get_site_url() . '/wc-api/ipay_acba_failed?order=' . $order_id;
-			// $gateway_params[] = 'jsonParams={"FORCE_3DS2":"true"}';
+			$gateway_params[] = 'jsonParams={"FORCE_3DS2":"true"}';
 			$gateway_params[] = '&clientId=' . get_current_user_id();
 
 			$response = wp_remote_post( $this->api_url . '/register.do?' . implode( '&', $gateway_params ) );
