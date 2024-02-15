@@ -65,7 +65,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 */
 		public function __construct() {
-			$this->id                 = 'ipay_acba';
+			$this->id                 = 'woopay_acba';
 			$this->icon               = ''; // URL of the icon that will be displayed on checkout page near your gateway name
 			$this->has_fields         = true;
 			$this->method_title       = __( 'iPay ACBA Payment Gateway', 'woopay-acba' );
@@ -100,12 +100,12 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 				array( $this, 'process_admin_options' )
 			);
 
-			add_action( 'woocommerce_api_ipay_acba_successful', [ $this, 'ipay_acba_pay_successful' ] );
-			add_action( 'woocommerce_api_ipay_acba_failed', [ $this, 'ipay_acba_pay_failed' ] );
+			add_action( 'woocommerce_api_woopa_acba_successful', [ $this, 'woopa_acba_pay_successful' ] );
+			add_action( 'woocommerce_api_woopa_acba_failed', [ $this, 'woopa_acba_pay_failed' ] );
 			add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
 			// Order statuses
-			add_action( 'woocommerce_order_status_changed', [ $this, 'ipay_acba_order_status_change' ], 10, 3 );
+			add_action( 'woocommerce_order_status_changed', [ $this, 'woopa_acba_order_status_change' ], 10, 3 );
 		}
 
 		/**
@@ -218,14 +218,14 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_status_change( $order_id, $status_from, $status_to ) {
+		public function woopa_acba_order_status_change( $order_id, $status_from, $status_to ) {
 			$order = wc_get_order( $order_id );
 
-			if ( wc_get_payment_gateway_by_order( $order )->id === 'ipay_acba' ) {
+			if ( wc_get_payment_gateway_by_order( $order )->id === 'woopa_acba' ) {
 				if ( $status_to === 'completed' ) {
-					return $this->ipay_acba_order_confirm( $order_id, $status_to );
+					return $this->woopa_acba_order_confirm( $order_id, $status_to );
 				} elseif ( $status_to === 'cancelled' ) {
-					return $this->ipay_acba_order_cancel( $order_id );
+					return $this->woopa_acba_order_cancel( $order_id );
 				}
 			}
 		}
@@ -243,7 +243,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_confirm( $order_id, $status_to ) {
+		public function woopa_acba_order_confirm( $order_id, $status_to ) {
 			$order = wc_get_order( $order_id );
 
 			if ( ! $order->has_status( 'processing' ) ) {
@@ -304,7 +304,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_cancel( $order_id ) {
+		public function woopa_acba_order_cancel( $order_id ) {
 			$order          = wc_get_order( $order_id );
 			$gateway_params = [];
 
@@ -355,7 +355,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
 		 * @api https://ipay.arca.am/payment/rest/getOrderStatus.do
 		 */
-		public function ipay_acba_pay_successful() {
+		public function woopa_acba_pay_successful() {
 			$bank_order_id  = isset( $_REQUEST['orderId'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderId'] ) ) : ''; // Unique bank order id
 			$gateway_params = [];
 
@@ -413,7 +413,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 		 *
 		 * @api https://ipay.arca.am/payment/rest/getOrderStatus.do
 		 */
-		public function ipay_acba_pay_failed() {
+		public function woopa_acba_pay_failed() {
 			// WC()->cart->empty_cart();
 			$gateway_params = [];
 
@@ -434,7 +434,7 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 						$body = json_decode( wp_remote_retrieve_body( $response ), false );
 
 						$order->update_status( 'failed' );
-						update_post_meta( $order_id, 'ipay_acba_failed_message', $body->errorMessage );
+						update_post_meta( $order_id, 'woopa_acba_failed_message', $body->errorMessage );
 						wp_redirect( $this->get_return_url( $order ) );
 						exit();
 					} else {
@@ -479,8 +479,8 @@ if ( ! class_exists( 'WooPay_Acba_Payment_Gateway' ) ) {
 			$gateway_params[] = 'password=' . $this->shop_password;
 			$gateway_params[] = 'userName=' . $this->shop_id;
 			$gateway_params[] = 'description=order number ' . $order_id;
-			$gateway_params[] = 'returnUrl=' . get_site_url() . '/wc-api/ipay_acba_successful?order=' . $order_id;
-			$gateway_params[] = 'failUrl=' . get_site_url() . '/wc-api/ipay_acba_failed?order=' . $order_id;
+			$gateway_params[] = 'returnUrl=' . get_site_url() . '/wc-api/woopa_acba_successful?order=' . $order_id;
+			$gateway_params[] = 'failUrl=' . get_site_url() . '/wc-api/woopa_acba_failed?order=' . $order_id;
 			// $gateway_params[] = 'jsonParams={"FORCE_3DS2":"true"}';
 			$gateway_params[] = '&clientId=' . get_current_user_id();
 
