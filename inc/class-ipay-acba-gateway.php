@@ -101,7 +101,6 @@ if ( ! class_exists( 'iPay_Acba_Payment_Gateway' ) ) {
 
 			// Order statuses
 			add_action( 'woocommerce_order_status_changed', [ $this, 'ipay_acba_order_status_change' ], 10, 3 );
-			// add_action( 'woocommerce_order_edit_status', [ $this, 'ipay_acba_order_status_change' ], 10, 2 );
 		}
 
 		/**
