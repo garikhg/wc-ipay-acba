@@ -29,9 +29,7 @@ go to "Payments" in the WordPress admin menu and follow the instructions there.
 == Changelog ==
 
 = 0.0.2 - 2024-02-15 =
-* Fixed: Change method title in WooPayment ACBA plugin
-* Fixed: Replace 'ipay_acba' hooks with 'woopay_acba' in gateway plugin
-* Fixed: Rename plugin iPay ACBA payment gateway to WooPayment ACBA
+* Fixed: Rename methods and text domain in WooCommerce iPay ACBA plugin
 
 = 0.0.1 - 2024-02-14 =
 * Add Alpha Release

@@ -19,7 +19,7 @@ if ( ! function_exists( 'ipay_acba_thankyou' ) ) {
 		if ( $order->has_status( 'failed' ) ) {
 			$order_failed_message = get_post_meta( $order_id, 'ipay_acba_failed_message', true );
 			if ( $order_failed_message ) {
-				echo sprintf( '<div class="ipay-error ipay-error-danger"><strong>%s</strong> %s</div>', __( 'Error!', 'woopay-acba' ), $order_failed_message );
+				echo sprintf( '<div class="ipay-error ipay-error-danger"><strong>%s</strong> %s</div>', __( 'Error!', 'ipay-acba' ), $order_failed_message );
 			}
 		}
 
