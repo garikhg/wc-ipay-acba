@@ -28,7 +28,10 @@ go to "Payments" in the WordPress admin menu and follow the instructions there.
 
 == Changelog ==
 
-= 0.0.2 - 2024-02-15 =
+= 1.0.0.beta1 - 2024-02-16 =
+* New: Enhanced system, users can now repay if they close payment window accidentally.
+* New: Enable FORCE_3DS2 parameter in iPay ACBA plugin
+* Fixed: Update order processing and add status checks for 'ipay_acba' plugin
 * Fixed: Rename methods and text domain in WooCommerce iPay ACBA plugin
 
 = 0.0.1 - 2024-02-14 =
