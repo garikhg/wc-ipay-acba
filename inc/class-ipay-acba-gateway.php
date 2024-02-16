@@ -244,7 +244,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @return bool True if the order was confirmed successfully, false otherwise.
 		 *
 		 * @see 7.2.3 Request to complete order payment
-		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
+		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
 		 *
 		 * @since 1.0.0
 		 */
@@ -304,7 +304,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 *
 		 * @see 7.1.3 Order cancellation request
-		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
+		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
 		 * @url https://ipay.arca.am/payment/rest/reverse.do
 		 *
 		 * @since 1.0.0
@@ -358,8 +358,6 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 					$order->update_status( 'processing' );
 					wp_die( __( 'Connection error. Please try again', 'ipay-acba' ) );
 				}
-
-
 			}
 		}
 
@@ -377,7 +375,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 *
 		 * @see 7.2.6 Query order status
-		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
+		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
 		 * @api https://ipay.arca.am/payment/rest/getOrderStatus.do
 		 */
 		public function ipay_acba_pay_successful() {
@@ -488,7 +486,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.1
 		 *
 		 * @see 7.1.1 Order registration request
-		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
+		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
 		 * @api https://ipay.arca.am/payment/rest/register.do
 		 */
 		public function process_payment( $order_id ) {
