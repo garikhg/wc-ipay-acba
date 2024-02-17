@@ -541,6 +541,15 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			];
 		}
 
+		/**
+		 * Get the status of the ACBA iPay order.
+		 *
+		 * @param int|null $order_id The ID of the order to get the status for.
+		 *
+		 * @return object|bool The order status as an object if the request was successful, false otherwise.
+		 *
+		 * @since 1.0.0
+		 */
 		protected function ipay_acba_get_order_status( $order_id = null ) {
 			if ( empty( $order_id ) ) {
 				return false;
