@@ -423,8 +423,6 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 */
 		public function ipay_acba_pay_failed() {
-			$arams = [];
-
 			$order_id      = isset( $_GET['order'] ) ? sanitize_text_field( wp_unslash( $_GET['order'] ) ) : '';
 			$bank_order_id = isset( $_GET['orderId'] ) ? sanitize_text_field( wp_unslash( $_GET['orderId'] ) ) : '';
 
