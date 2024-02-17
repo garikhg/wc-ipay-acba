@@ -11,7 +11,9 @@
  * License: GPLv3 or later
  */
 
-defined( 'ABSPATH' ) || exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 define( 'WOOPAY_ACBA_PLUGIN_VERSION', '1.0.0' );
 define( 'WOOPAY_ACBA_PLUGIN_DIR', dirname( __FILE__ ) );
@@ -48,4 +50,5 @@ function ipay_acba_init_class() {
 
 add_action( 'plugins_loaded', 'ipay_acba_init_class' );
 
+require WOOPAY_ACBA_PLUGIN_DIR . '/inc/ipay-acba-helpers.php';
 require WOOPAY_ACBA_PLUGIN_DIR . '/inc/ipay-acba-thankyou.php';

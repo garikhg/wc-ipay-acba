@@ -310,50 +310,42 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 */
 		public function ipay_acba_cancel_order( $order_id, $status_to ) {
-			$order          = wc_get_order( $order_id );
-			$gateway_params = [];
+			$order  = wc_get_order( $order_id );
+			$params = [];
 
 			if ( ! $order->has_status( 'processing' ) ) {
 
 				$PaymentID = get_post_meta( $order_id, 'PaymentID', true );
 				$amount    = floatval( $order->get_total() ) * 100;
 
-				$gateway_params[] = 'amount=' . (int) $amount;
-				$gateway_params[] = 'language=' . $this->language;
-				$gateway_params[] = 'orderId=' . $PaymentID;
-				$gateway_params[] = 'password=' . $this->shop_password;
-				$gateway_params[] = 'userName=' . $this->shop_id;
+				$params[] = 'amount=' . (int) $amount;
+				$params[] = 'language=' . $this->language;
+				$params[] = 'orderId=' . $PaymentID;
+				$params[] = 'password=' . $this->shop_password;
+				$params[] = 'userName=' . $this->shop_id;
 
-				$response = wp_remote_post( $this->api_url . '/reverse.do?' . implode( '&', $gateway_params ) );
+				$response = wp_remote_post( $this->api_url . '/reverse.do?' . implode( '&', $params ) );
 				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 					if ( ! is_wp_error( $response ) ) {
 						$body = json_decode( wp_remote_retrieve_body( $response ), false );
 
-						$order_status  = $this->ipay_acba_get_order_status_ext( $order_id );
-						$payment_state = $order_status ? $order_status->paymentAmountInfo->paymentState : '';
-
 						// todo: check and fixed api issue (Access denied)
-						if ( $body->errorCode == 0 ) {
-							$order->update_status( 'cancelled' );
+						if ( 0 != $body->errorCode ) {
+							// check order status
+							// $order_status = $this->ipay_acba_get_order_status_ext( $order_id );
 
-							return true;
-						} else {
-
-							// $order->update_status( 'processing' );
-							if ( $order_status && $payment_state === 'DECLINED' ) {
-								$order->update_status( 'cancelled' );
-							} elseif ( $status_to === 'cancelled' ) {
-								// $order->update_status( 'processing' );
-								$order->update_status( 'pending' );
-
-								return true;
-							}
-							// wp_die( $body->errorMessage );
+							/*if ( 0 == $order_status->errorCode ) {
+								// $payment_state = $order_status->paymentAmountInfo->paymentState;
+								// todo: change order status to process if is paid
+							}*/
 						}
+						$order->update_status( 'cancelled' );
 					} else {
 						$order->update_status( 'processing' );
 						wp_die( sprintf( __( 'Order Cancel paymend #%s failed.', 'ipay-acba' ), $order_id ) );
 					}
+
+					return true;
 				} else {
 					$order->update_status( 'processing' );
 					wp_die( __( 'Connection error. Please try again', 'ipay-acba' ) );
@@ -373,22 +365,18 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @return void
 		 * @since 1.0.0
-		 *
-		 * @see 7.2.6 Query order status
-		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
-		 * @api https://ipay.arca.am/payment/rest/getOrderStatus.do
 		 */
 		public function ipay_acba_pay_successful() {
-			$bank_order_id  = isset( $_REQUEST['orderId'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderId'] ) ) : ''; // Unique bank order id
-			$gateway_params = [];
+			$bank_order_id = isset( $_REQUEST['orderId'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderId'] ) ) : ''; // Unique bank order id
+			$params        = [];
 
 			if ( ! empty( $bank_order_id ) ) {
-				$gateway_params[] = 'orderId=' . $bank_order_id;
-				$gateway_params[] = 'language=' . $this->language;
-				$gateway_params[] = 'password=' . $this->shop_password;
-				$gateway_params[] = 'userName=' . $this->shop_id;
+				$params[] = 'orderId=' . $bank_order_id;
+				$params[] = 'language=' . $this->language;
+				$params[] = 'password=' . $this->shop_password;
+				$params[] = 'userName=' . $this->shop_id;
 
-				$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $gateway_params ) );
+				$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $params ) );
 				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 					if ( ! is_wp_error( $response ) ) {
 						$body = json_decode( wp_remote_retrieve_body( $response ), false );
@@ -433,12 +421,9 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @return void
 		 * @since 1.0.0
-		 *
-		 * @api https://ipay.arca.am/payment/rest/getOrderStatus.do
 		 */
 		public function ipay_acba_pay_failed() {
-			// WC()->cart->empty_cart();
-			$gateway_params = [];
+			$arams = [];
 
 			$order_id      = isset( $_GET['order'] ) ? sanitize_text_field( wp_unslash( $_GET['order'] ) ) : '';
 			$bank_order_id = isset( $_GET['orderId'] ) ? sanitize_text_field( wp_unslash( $_GET['orderId'] ) ) : '';
@@ -446,12 +431,12 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			if ( $bank_order_id && $bank_order_id !== '' ) {
 				$order = wc_get_order( $order_id );
 
-				$gateway_params[] = 'orderId=' . $bank_order_id;
-				$gateway_params[] = 'language=' . $this->language;
-				$gateway_params[] = 'password=' . $this->shop_password;
-				$gateway_params[] = 'userName=' . $this->shop_id;
+				$params[] = 'orderId=' . $bank_order_id;
+				$params[] = 'language=' . $this->language;
+				$params[] = 'password=' . $this->shop_password;
+				$params[] = 'userName=' . $this->shop_id;
 
-				$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $gateway_params ) );
+				$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $params ) );
 				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 					if ( ! is_wp_error( $response ) ) {
 						$body = json_decode( wp_remote_retrieve_body( $response ), false );
@@ -485,28 +470,27 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @return string[]
 		 * @since 1.0.1
 		 *
-		 * @see 7.1.1 Order registration request
-		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
+		 * @link https://cabinet.arca.am/file_manager/Merchant%20Manual_1.55.1.0.pdf
 		 * @api https://ipay.arca.am/payment/rest/register.do
 		 */
 		public function process_payment( $order_id ) {
-			$gateway_params = [];
+			$params = [];
 
 			$order  = wc_get_order( $order_id );
 			$amount = floatval( $order->get_total() ) * 100;
 
-			$gateway_params[] = 'amount=' . (int) $amount;
-			$gateway_params[] = 'currency=' . $this->currency_code;
-			$gateway_params[] = 'orderNumber=' . $order_id;
-			$gateway_params[] = 'userName=' . $this->shop_id;
-			$gateway_params[] = 'password=' . $this->shop_password;
-			$gateway_params[] = 'description=order number ' . $order_id;
-			$gateway_params[] = 'returnUrl=' . get_site_url() . '/wc-api/ipay_acba_successful?order=' . $order_id;
-			$gateway_params[] = 'failUrl=' . get_site_url() . '/wc-api/ipay_acba_failed?order=' . $order_id;
-			$gateway_params[] = 'language=' . $this->language;
-			$gateway_params[] = 'jsonParams={"FORCE_3DS2":"true"}';
+			$params[] = 'amount=' . (int) $amount;
+			$params[] = 'currency=' . $this->currency_code;
+			$params[] = 'orderNumber=' . $order_id;
+			$params[] = 'userName=' . $this->shop_id;
+			$params[] = 'password=' . $this->shop_password;
+			$params[] = 'description=order number ' . $order_id;
+			$params[] = 'returnUrl=' . get_site_url() . '/wc-api/ipay_acba_successful?order=' . $order_id;
+			$params[] = 'failUrl=' . get_site_url() . '/wc-api/ipay_acba_failed?order=' . $order_id;
+			$params[] = 'language=' . $this->language;
+			$params[] = 'jsonParams={"FORCE_3DS2":"true"}';
 
-			$response = wp_remote_post( $this->api_url . '/register.do?' . implode( '&', $gateway_params ) );
+			$response = wp_remote_post( $this->api_url . '/register.do?' . implode( '&', $params ) );
 
 			if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 				if ( ! is_wp_error( $response ) ) {
@@ -520,71 +504,65 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 
 						return [ 'result' => 'success', 'redirect' => $body->formUrl ];
 					} else {
-						// WC()->cart->empty_cart();
-						$order_status  = $this->ipay_acba_get_order_status_ext( $order_id ) ?? '';
-						$payment_state = $order_status ? $order_status->paymentAmountInfo->paymentState : '';
-						$PaymentID     = get_post_meta( $order_id, 'PaymentID', true );
+						$order_status = $this->ipay_acba_get_order_status_ext( $order_id );
 
-						if ( 0 == $order_status->errorCode && $payment_state == 'CREATED' && ! empty( $PaymentID ) ) {
-							$formUrl = $this->merchants_url . $order_status->terminalId . '/payment_' . $this->language . '.html?mdOrder=' . $PaymentID;
+						if ( 0 == $order_status->errorCode ) {
+							$PaymentID     = get_post_meta( $order_id, 'PaymentID', true );
+							$payment_state = $order_status->paymentAmountInfo->paymentState;
 
-							return [ 'result' => 'success', 'redirect' => $formUrl ];
-						} elseif ( $payment_state == 'DECLINED' && ! empty( $PaymentID ) ) {
-							if ( WC()->cart->get_cart_contents_count() > 0 ) {
-								WC()->cart->empty_cart();
+							if ( $payment_state == 'CREATED' && ! empty( $PaymentID ) ) {
+								$formUrl = $this->merchants_url . $order_status->terminalId . '/payment_' . $this->language . '.html?mdOrder=' . $PaymentID;
+
+								return [ 'result' => 'success', 'redirect' => $formUrl ];
+							} elseif ( $payment_state == 'DECLINED' && ! empty( $PaymentID ) ) {
+								$order->update_status( 'failed', sprintf( 'order #%s is failed. Payment state Declined', $order_id ) );
+
+								wc_add_notice( sprintf( __( 'Your order #%s is failed. Payment state Declined', 'ipay-acba' ), $order_id ) );
 							}
 
-							$order->update_status( 'cancelled' );
-							wc_add_notice( $body->errorMessage, 'error' );
-
-							return [
-								'result'   => 'success',
-								'redirect' => get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
-							];
+						} else {
+							$order->update_status( 'failed', sprintf( 'Order #%s is failed.', $order_id ) );
+							wc_add_notice( sprintf( __( 'Your order #%s is failed.', 'ipay-acba' ), $order_id ) );
 						}
 					}
-
 				} else {
 					$order->update_status( 'failed' );
 					wc_add_notice( __( 'Connection error. Please try again', 'ipay-acba' ), 'error' );
-
-					return [
-						'result'   => 'success',
-						'redirect' => get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
-					];
 				}
-
-				wp_die();
 			} else {
 				$order->update_status( 'failed' );
 				wc_add_notice( __( 'Connection error. Please try again later.', 'ipay-acba' ), 'error' );
 				wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
-
-				return [
-					'result'   => 'success',
-					'redirect' => get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
-				];
 			}
+
+			// ipay_acba_redirect_pay_for_order( $order_id );
+			return [
+				'result'   => 'success',
+				'redirect' => get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
+			];
 		}
 
 		protected function ipay_acba_get_order_status( $order_id = null ) {
-			$gateway_params = [];
-			$body           = '';
+			if ( empty( $order_id ) ) {
+				return false;
+			}
+			$params = [];
+			$body   = '';
 
 			$order     = wc_get_order( $order_id );
 			$PaymentID = get_post_meta( $order_id, 'PaymentID', true );
 			$amount    = floatval( $order->get_total() ) * 100;
 
-			$gateway_params[] = 'amount=' . (int) $amount;
-			$gateway_params[] = 'currency=' . $this->currency_code;
-			$gateway_params[] = 'orderId=' . $PaymentID;
-			$gateway_params[] = 'language=en';
-			$gateway_params[] = 'password=' . $this->shop_password;
-			$gateway_params[] = 'userName=' . $this->shop_id;
+			$params[] = 'amount=' . (int) $amount;
+			$params[] = 'currency=' . $this->currency_code;
+			$params[] = 'orderId=' . $PaymentID;
+			$params[] = 'language=en';
+			$params[] = 'password=' . $this->shop_password;
+			$params[] = 'userName=' . $this->shop_id;
 
 
 			// URL for API: https://ipay.arca.am/payment/rest/getOrderStatus.do
-			$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $gateway_params ) );
+			$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $params ) );
 			if ( ! is_wp_error( $response ) ) {
 				$body = json_decode( wp_remote_retrieve_body( $response ), false );
 			}
@@ -592,25 +570,35 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			return $body;
 		}
 
+		/**
+		 * Retrieves the extended order status from ACBA iPay.
+		 *
+		 * @param int|null $order_id The ID of the order to retrieve the status for.
+		 *
+		 * @return false The response body as a parsed JSON object. If the order ID is empty, false is returned.
+		 *
+		 * @since 1.0.0
+		 */
 		protected function ipay_acba_get_order_status_ext( $order_id ) {
-			if ( empty( $order_id ) ) {
+			if ( ! $order_id ) {
 				return false;
 			}
-			$gateway_params = [];
-			$body           = '';
+
+			$params = [];
+			$body   = '';
 
 			$order     = wc_get_order( $order_id );
 			$PaymentID = get_post_meta( $order_id, 'PaymentID', true );
 			$amount    = floatval( $order->get_total() ) * 100;
 
-			$gateway_params[] = 'amount=' . (int) $amount;
-			$gateway_params[] = 'currency=' . $this->currency_code;
-			$gateway_params[] = 'orderId=' . $PaymentID;
-			$gateway_params[] = 'language=en';
-			$gateway_params[] = 'password=' . $this->shop_password;
-			$gateway_params[] = 'userName=' . $this->shop_id;
+			$params[] = 'amount=' . (int) $amount;
+			$params[] = 'currency=' . $this->currency_code;
+			$params[] = 'orderId=' . $PaymentID;
+			$params[] = 'language=en';
+			$params[] = 'password=' . $this->shop_password;
+			$params[] = 'userName=' . $this->shop_id;
 
-			$response = wp_remote_post( $this->api_url . '/getOrderStatusExtended.do?' . implode( '&', $gateway_params ) );
+			$response = wp_remote_post( $this->api_url . '/getOrderStatusExtended.do?' . implode( '&', $params ) );
 			if ( ! is_wp_error( $response ) ) {
 				$body = json_decode( wp_remote_retrieve_body( $response ), false );
 			}
