@@ -560,7 +560,6 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			$params[] = 'password=' . $this->shop_password;
 			$params[] = 'userName=' . $this->shop_id;
 
-
 			// URL for API: https://ipay.arca.am/payment/rest/getOrderStatus.do
 			$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $params ) );
 			if ( ! is_wp_error( $response ) ) {
