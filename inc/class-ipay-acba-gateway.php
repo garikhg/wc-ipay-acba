@@ -535,7 +535,6 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 				wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
 			}
 
-			// ipay_acba_redirect_pay_for_order( $order_id );
 			return [
 				'result'   => 'success',
 				'redirect' => get_permalink( get_option( 'woocommerce_checkout_page_id' ) )
