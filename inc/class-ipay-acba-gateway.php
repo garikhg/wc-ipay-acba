@@ -420,6 +420,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			if ( ! empty( $bank_order_id ) && ! empty( $order_id ) ) {
 				$order = wc_get_order( $order_id );
 
+				$params   = array();
 				$params[] = 'orderId=' . $bank_order_id;
 				$params[] = 'language=' . $this->language;
 				$params[] = 'password=' . $this->shop_password;
