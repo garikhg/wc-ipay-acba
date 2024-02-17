@@ -243,7 +243,6 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @return bool True if the order was confirmed successfully, false otherwise.
 		 *
-		 * @see 7.2.3 Request to complete order payment
 		 * @link https://garikhg.github.io/woo-ipay-acba/docs/Merchant_Manual_1.55.1.0.pdf
 		 *
 		 * @since 1.0.0
