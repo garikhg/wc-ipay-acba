@@ -3,7 +3,7 @@
  * Plugin Name: iPay ACBA
  * Plugin URI: https://garikhg.github.io/woo-ipay-acba/
  * Description: Pay with ACBA Bank is a seamless payment system tailored for transactions in Armenian Dram. Pay with ACBA Bank ensures swift and secure payments for various goods and services.
- * Version: 1.0.0-beta1
+ * Version: 1.0.0-beta2
  * Author: Garegin Hakobyan
  * Author URI: #
  * Text Domain: ipay-acba
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'WOOPAY_ACBA_PLUGIN_VERSION', '1.0.0' );
+define( 'WOOPAY_ACBA_PLUGIN_VERSION', '1.0.0-beta2' );
 define( 'WOOPAY_ACBA_PLUGIN_DIR', dirname( __FILE__ ) );
 
 /**
