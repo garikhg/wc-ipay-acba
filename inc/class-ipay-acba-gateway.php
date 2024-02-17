@@ -368,8 +368,8 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 */
 		public function ipay_acba_pay_successful() {
+			$order         = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : ''; // Unique shop order number
 			$bank_order_id = isset( $_REQUEST['orderId'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderId'] ) ) : ''; // Unique bank order id
-			$order         = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : ''; // Unique bank order id
 
 			if ( ! empty( $bank_order_id ) && ! empty( $order ) ) {
 				$params   = array();
@@ -414,8 +414,8 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * @since 1.0.0
 		 */
 		public function ipay_acba_pay_failed() {
-			$order_id      = isset( $_GET['order'] ) ? sanitize_text_field( wp_unslash( $_GET['order'] ) ) : '';
-			$bank_order_id = isset( $_GET['orderId'] ) ? sanitize_text_field( wp_unslash( $_GET['orderId'] ) ) : '';
+			$order_id      = isset( $_GET['order'] ) ? sanitize_text_field( wp_unslash( $_GET['order'] ) ) : ''; // Unique shop order number
+			$bank_order_id = isset( $_GET['orderId'] ) ? sanitize_text_field( wp_unslash( $_GET['orderId'] ) ) : ''; // Unique bank order id
 
 			if ( ! empty( $bank_order_id ) && ! empty( $order_id ) ) {
 				$order = wc_get_order( $order_id );
