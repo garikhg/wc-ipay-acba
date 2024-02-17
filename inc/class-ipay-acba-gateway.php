@@ -358,58 +358,44 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		}
 
 		/**
-		 * Process a successful payment transaction.
+		 * Handles successful payment confirmation for ACBA iPay.
 		 *
-		 * This method is called when a payment is successful. It empties the WooCommerce cart and retrieves the order ID and bank order ID from the request parameters. It then makes a request
-		 * to the API to get the order status and updates the order status in WooCommerce accordingly. Finally, it redirects the user to the appropriate page based on the order status.
+		 * This method is responsible for updating the order status and redirecting the customer
+		 * to the appropriate return URL after a successful payment confirmation from ACBA iPay.
 		 *
 		 * @return void
+		 *
 		 * @since 1.0.0
 		 */
 		public function ipay_acba_pay_successful() {
 			$bank_order_id = isset( $_REQUEST['orderId'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderId'] ) ) : ''; // Unique bank order id
-			$params        = [];
+			$order         = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : ''; // Unique bank order id
 
-			if ( ! empty( $bank_order_id ) ) {
+			if ( ! empty( $bank_order_id ) && ! empty( $order ) ) {
+				$params   = array();
 				$params[] = 'orderId=' . $bank_order_id;
 				$params[] = 'language=' . $this->language;
 				$params[] = 'password=' . $this->shop_password;
 				$params[] = 'userName=' . $this->shop_id;
 
 				$response = wp_remote_post( $this->api_url . '/getOrderStatus.do?' . implode( '&', $params ) );
-				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-					if ( ! is_wp_error( $response ) ) {
-						$body = json_decode( wp_remote_retrieve_body( $response ), false );
+				$body     = json_decode( wp_remote_retrieve_body( $response ), false );
 
-						if ( $body->errorCode == 0 ) {
-							if ( isset( $body->orderStatus ) && $body->orderStatus == '2' ) {
-								$order = wc_get_order( $body->orderNumber );
-								if ( $order->has_status( 'processing' ) ) {
-									wc_add_notice( sprintf( __( 'Your order #%s is in processing.', 'ipay-acba' ), $body->orderNumber ) );
-									wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
-								} else {
-									$order->update_status( 'processing' );
-									// Empty the cart after processing the order
-									// WC()->cart->empty_cart();
-									wp_redirect( $this->get_return_url( $order ) );
-								}
-								exit();
-							}
-						} else {
-							wc_add_notice( $body->errorMessage, 'error' );
-						}
-					} else {
-						wc_add_notice( __( 'An error has occurred, please contact the site administrator', 'ipay-acba' ), 'error' );
+				if ( $body->errorCode == 0 ) {
+					if ( isset( $body->orderStatus ) && $body->orderStatus == '2' ) {
+						update_post_meta( $order, 'PaymentID', $bank_order_id );
+						$order = wc_get_order( $body->orderNumber );
+						$order->update_status( 'processing' );
+						echo $this->get_return_url( $order );
+						wp_redirect( $this->get_return_url( $order ) );
+						exit;
 					}
 				} else {
-					wc_add_notice( __( 'Connection error. Please contact with site administrator.', 'ipay-acba' ), 'error' );
-					wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
+					$order = wc_get_order( $order );
+					$order->update_status( 'failed' );
+					$order->add_order_note( $body->errorMessage, true );
 				}
 			}
-
-			wc_add_notice( __( 'Please try again', 'ipay-acba' ), 'error' );
-			wp_redirect( get_permalink( get_option( 'woocommerce_checkout_page_id' ) ) );
-			exit();
 		}
 
 		/**
