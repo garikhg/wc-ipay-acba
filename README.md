@@ -1,3 +1,7 @@
+---
+title-heading: false
+---
+
 # iPay ACBA Bank Payment Gateway for WooCommerce
 
 This is a feature plugin for accepting payments via a ACBA Bank payment gateway.
