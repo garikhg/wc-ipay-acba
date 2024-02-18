@@ -319,35 +319,38 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 
 				$params[] = 'amount=' . (int) $amount;
 				$params[] = 'language=' . $this->language;
-				$params[] = 'orderId=' . $PaymentID;
 				$params[] = 'password=' . $this->shop_password;
 				$params[] = 'userName=' . $this->shop_id;
+				$params[] = 'orderId=' . $PaymentID;
 
+				// todo: check and fixed problem api issue (Access denied)
 				$response = wp_remote_post( $this->api_url . '/reverse.do?' . implode( '&', $params ) );
-				if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-					if ( ! is_wp_error( $response ) ) {
-						$body = json_decode( wp_remote_retrieve_body( $response ), false );
+				if ( ! is_wp_error( $response ) ) {
+					$body = json_decode( wp_remote_retrieve_body( $response ), false );
 
-						// todo: check and fixed api issue (Access denied)
-						if ( 0 != $body->errorCode ) {
-							// check order status
-							// $order_status = $this->ipay_acba_get_order_status_ext( $order_id );
-
-							/*if ( 0 == $order_status->errorCode ) {
-								// $payment_state = $order_status->paymentAmountInfo->paymentState;
-								// todo: change order status to process if is paid
-							}*/
-						}
+					if ( 0 == $body->errorCode ) {
+						// if ( 0 == $order_status->errorCode ) {
+						// 	$order->update_status( 'cancelled' );
+						// }
 						$order->update_status( 'cancelled' );
 					} else {
-						$order->update_status( 'processing' );
-						wp_die( sprintf( __( 'Order Cancel paymend #%s failed.', 'ipay-acba' ), $order_id ) );
+						$order_status = $this->ipay_acba_get_order_status_ext( $order_id );
+						if ( $order_status->errorCode == 0 && $order_status != '' ) {
+							$payment_state = $order_status->paymentAmountInfo->paymentState;
+							if ( $payment_state == 'CREATED' ) {
+								$order->update_status( 'pending', sprintf( 'Order #%s is in the process of payment.', $order_id ) );
+								wc_add_notice( sprintf( __( 'Order #%s is in the process of payment.', 'ipay-acba' ), $order_id ) );
+							} else {
+								$order->update_status( 'cancelled', sprintf( 'Order #%s Cancelled.', $order_id ) );
+							}
+						}
+						wp_die( $body->errorMessage );
 					}
 
 					return true;
 				} else {
 					$order->update_status( 'processing' );
-					wp_die( __( 'Connection error. Please try again', 'ipay-acba' ) );
+					wp_die( sprintf( __( 'Order Cancel paymend #%s failed. Order status changed to "Processing"', 'ipay-acba' ), $order_id ) );
 				}
 			}
 		}
