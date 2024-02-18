@@ -308,7 +308,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_cancel_order( $order_id, $status_to ) {
+		public function ipay_acba_cancel_order( $order_id ) {
 			$order  = wc_get_order( $order_id );
 			$params = [];
 
