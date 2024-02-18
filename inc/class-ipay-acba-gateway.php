@@ -333,21 +333,25 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 						// 	$order->update_status( 'cancelled' );
 						// }
 						$order->update_status( 'cancelled' );
+
+						return true;
 					} else {
 						$order_status = $this->ipay_acba_get_order_status_ext( $order_id );
 						if ( $order_status->errorCode == 0 && $order_status != '' ) {
 							$payment_state = $order_status->paymentAmountInfo->paymentState;
 							if ( $payment_state == 'CREATED' ) {
-								$order->update_status( 'pending', sprintf( 'Order #%s is in the process of payment.', $order_id ) );
-								wc_add_notice( sprintf( __( 'Order #%s is in the process of payment.', 'ipay-acba' ), $order_id ) );
+								$order->update_status( 'pending' );
+								$order->add_order_note( 'Order #' . $order_id . ' is in the process of payment. Order status', true );
 							} else {
-								$order->update_status( 'cancelled', sprintf( 'Order #%s Cancelled.', $order_id ) );
+								$order->update_status( 'cancelled' );
+								$order->add_order_note( 'Order #' . $order_id . ' cancelled. Order Status Declined', true );
 							}
+
+							return true;
 						}
-						wp_die( $body->errorMessage );
+						// wp_die( $body->errorMessage );
 					}
 
-					return true;
 				} else {
 					$order->update_status( 'processing' );
 					wp_die( sprintf( __( 'Order Cancel paymend #%s failed. Order status changed to "Processing"', 'ipay-acba' ), $order_id ) );

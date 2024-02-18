@@ -28,6 +28,9 @@ go to "Payments" in the WordPress admin menu and follow the instructions there.
 
 == Changelog ==
 
+= 1.0.0.beta4 - 2024-02-17 =
+* Fix: Fixed an error checking the order status when closing an order
+
 = 1.0.0.beta3 - 2024-02-17 =
 * Fix: Refactor iPay ACBA plugin for enhanced error management
 * Add: Added an order status check when closing an order to exclude accidental cancellations during the payment process.
