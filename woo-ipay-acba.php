@@ -35,7 +35,6 @@ function ipay_acba_payment_gateway( $gateways ) {
 
 add_filter( 'woocommerce_payment_gateways', 'ipay_acba_payment_gateway' );
 
-
 /**
  * Initializes the iPay ACBA Gateway plugin.
  *
