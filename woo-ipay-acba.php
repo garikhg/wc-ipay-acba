@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'WOOPAY_ACBA_PLUGIN_VERSION', '1.0.0.beta4' );
 define( 'WOOPAY_ACBA_PLUGIN_DIR', dirname( __FILE__ ) );
+define( 'WOOPAY_ACBA_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 
 /**
  * Adds the iPay ACBA Payment Gateway to the list of available gateways.
