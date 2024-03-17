@@ -347,6 +347,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 							} else {
 								$order->update_status( 'cancelled' );
 								$order->add_order_note( 'Order #' . $order_id . ' cancelled. Order Status Declined', true );
+								$this->ipay_acba_update_stock_on_order_cancellation( $order_id );
 							}
 
 							return true;
@@ -602,6 +603,34 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			}
 
 			return $body;
+		}
+
+		/**
+		 * Updates the stock quantity of products when an order is cancelled and is not paid.
+		 *
+		 * @param int $order_id The order ID.
+		 *
+		 * @return void
+		 */
+		protected function ipay_acba_update_stock_on_order_cancellation( int $order_id ) {
+			$order = wc_get_order( $order_id );
+
+			if ( $order->is_paid() ) {
+				return;
+			}
+
+			// Loop through each item
+			foreach ( $order->get_items() as $item ) {
+				$product = $item->get_product();
+
+				// Increase stock quantity
+				$quantity           = $item->get_quantity();
+				$stock_quantity     = $product->get_stock_quantity();
+				$new_stock_quantity = ( $stock_quantity + $quantity );
+				$product->set_stock_quantity( $new_stock_quantity );
+				$product->save();
+				// wc_update_product_stock( $product_id, $amount, 'increase' );
+			}
 		}
 	}
 }
