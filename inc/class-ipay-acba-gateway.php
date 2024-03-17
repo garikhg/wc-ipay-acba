@@ -108,7 +108,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
 			// Order statuses
-			add_action( 'woocommerce_order_status_changed', [ $this, 'ipay_acba_order_status_change' ], 10, 3 );
+			add_action( 'woocommerce_order_status_changed', [ $this, 'ipay_acba_order_status_change' ], 10, 4 );
 
 			// $this->log = version_compare( WooCommerce::instance()->version, '2.1', '<' ) ? $woocommerce->logger() : new WC_Logger();
 		}
@@ -216,21 +216,21 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * Changes the status of an ACBA iPay order.
 		 *
 		 * @param int $order_id The ID of the order to change the status.
-		 * @param string $status_from The current status of the order.
-		 * @param string $status_to The desired status to update the order to ('completed' or 'cancelled').
+		 * @param string $old_status The current status of the order.
+		 * @param string $new_status The desired status to update the order to ('completed' or 'cancelled').
 		 *
 		 * @return bool True if the status was changed successfully, false otherwise.
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_status_change( $order_id, $status_from, $status_to ) {
+		public function ipay_acba_order_status_change( $order_id, $old_status, $new_status ) {
 			$order = wc_get_order( $order_id );
 
 			if ( wc_get_payment_gateway_by_order( $order )->id === 'ipay_acba' ) {
-				if ( $status_to === 'completed' ) {
-					return $this->ipay_acba_order_confirm( $order_id, $status_to );
-				} elseif ( $status_to === 'cancelled' ) {
-					return $this->ipay_acba_cancel_order( $order_id, $status_to );
+				if ( $new_status === 'completed' ) {
+					return $this->ipay_acba_order_confirm( $order_id, $new_status );
+				} elseif ( $new_status === 'cancelled' ) {
+					return $this->ipay_acba_cancel_order( $order_id );
 				}
 			}
 		}
@@ -239,7 +239,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 * Confirms the ACBA iPay order.
 		 *
 		 * @param int $order_id The ID of the order to confirm.
-		 * @param string $status_to The status to update the order to ('completed' or 'active').
+		 * @param string $new_status The status to update the order to ('completed' or 'active').
 		 *
 		 * @return bool True if the order was confirmed successfully, false otherwise.
 		 *
@@ -247,7 +247,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_confirm( $order_id, $status_to ) {
+		public function ipay_acba_order_confirm( $order_id, $new_status ) {
 			$order = wc_get_order( $order_id );
 
 			if ( ! $order->has_status( 'processing' ) ) {
@@ -256,7 +256,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 				$PaymentID = get_post_meta( $order_id, 'PaymentID', true );
 
 				$params[] = 'amount=' . (int) $amount;
-				// $gateway_params[] = 'currency=' . $this->currency_code;
+				$params[] = 'currency=' . $this->currency_code;
 				$params[] = 'orderId=' . $PaymentID;
 				$params[] = 'password=' . $this->shop_password;
 				$params[] = 'userName=' . $this->shop_id;
@@ -269,22 +269,24 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 						$body = json_decode( wp_remote_retrieve_body( $response ), false );
 
 						if ( $body->errorCode == 0 && isset( $body->orderStatus ) && $body->orderStatus == 2 ) {
-							if ( $status_to == 'completed' ) {
+							if ( $new_status == 'completed' ) {
 								$order->update_status( 'completed' );
 							}
 
 							return true;
 						} else {
-							if ( $status_to == 'completed' ) {
-								$order->update_status( 'processing', $body->errorMessage );
+							if ( $new_status == 'completed' ) {
+								$error_message = $body->errorMessage . '.';
+								$order->update_status( 'failed', $error_message );
 							} else {
 								$order->update_status( 'on-hold', $body->errorMessage );
 							}
 						}
+
 						wp_die( $body->errorMessage );
 					}
 				} else {
-					if ( $status_to == 'completed' ) {
+					if ( $new_status == 'completed' ) {
 						$order->update_status( 'processing' );
 					} else {
 						$order->update_status( 'on-hold' );
@@ -345,11 +347,12 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 							} else {
 								$order->update_status( 'cancelled' );
 								$order->add_order_note( 'Order #' . $order_id . ' cancelled. Order Status Declined', true );
+								$this->ipay_acba_update_stock_on_order_cancellation( $order_id );
 							}
 
 							return true;
 						}
-						// wp_die( $body->errorMessage );
+						wp_die( $body->errorMessage );
 					}
 
 				} else {
@@ -426,7 +429,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			if ( ! empty( $bank_order_id ) && ! empty( $order_id ) ) {
 				$order = wc_get_order( $order_id );
 
-				$params   = array();
+				$params   = [];
 				$params[] = 'orderId=' . $bank_order_id;
 				$params[] = 'language=' . $this->language;
 				$params[] = 'password=' . $this->shop_password;
@@ -600,6 +603,34 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 			}
 
 			return $body;
+		}
+
+		/**
+		 * Updates the stock quantity of products when an order is cancelled and is not paid.
+		 *
+		 * @param int $order_id The order ID.
+		 *
+		 * @return void
+		 */
+		protected function ipay_acba_update_stock_on_order_cancellation( int $order_id ) {
+			$order = wc_get_order( $order_id );
+
+			if ( $order->is_paid() ) {
+				return;
+			}
+
+			// Loop through each item
+			foreach ( $order->get_items() as $item ) {
+				$product = $item->get_product();
+
+				// Increase stock quantity
+				$quantity           = $item->get_quantity();
+				$stock_quantity     = $product->get_stock_quantity();
+				$new_stock_quantity = ( $stock_quantity + $quantity );
+				$product->set_stock_quantity( $new_stock_quantity );
+				$product->save();
+				// wc_update_product_stock( $product_id, $amount, 'increase' );
+			}
 		}
 	}
 }
