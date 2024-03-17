@@ -223,7 +223,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public function ipay_acba_order_status_change( $order_id, $old_status, $new_status, $order ) {
+		public function ipay_acba_order_status_change( $order_id, $old_status, $new_status ) {
 			$order = wc_get_order( $order_id );
 
 			if ( wc_get_payment_gateway_by_order( $order )->id === 'ipay_acba' ) {
@@ -256,7 +256,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 				$PaymentID = get_post_meta( $order_id, 'PaymentID', true );
 
 				$params[] = 'amount=' . (int) $amount;
-				// $gateway_params[] = 'currency=' . $this->currency_code;
+				$params[] = 'currency=' . $this->currency_code;
 				$params[] = 'orderId=' . $PaymentID;
 				$params[] = 'password=' . $this->shop_password;
 				$params[] = 'userName=' . $this->shop_id;
@@ -276,11 +276,13 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 							return true;
 						} else {
 							if ( $new_status == 'completed' ) {
-								$order->update_status( 'processing', $body->errorMessage );
+								$error_message = $body->errorMessage . '.';
+								$order->update_status( 'failed', $error_message );
 							} else {
 								$order->update_status( 'on-hold', $body->errorMessage );
 							}
 						}
+
 						wp_die( $body->errorMessage );
 					}
 				} else {
@@ -349,7 +351,7 @@ if ( ! class_exists( 'iPayAcba_Payment_Gateway' ) ) {
 
 							return true;
 						}
-						// wp_die( $body->errorMessage );
+						wp_die( $body->errorMessage );
 					}
 
 				} else {
